@@ -69,6 +69,40 @@ impl TryFrom<&str> for CardListingFormat {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_detect_number() {
+        assert_eq!(
+            CardListingFormat::try_from("4 Chandra's Spitfire"),
+            Ok(CardListingFormat::Number)
+        );
+    }
+
+    #[test]
+    fn test_detect_number_and_x() {
+        assert_eq!(
+            CardListingFormat::try_from("4x Chandra's Spitfire"),
+            Ok(CardListingFormat::NumberAndX)
+        );
+    }
+
+    #[test]
+    fn test_detect_plain() {
+        assert_eq!(
+            CardListingFormat::try_from("Chandra's Spitfire"),
+            Ok(CardListingFormat::Plain)
+        );
+    }
+
+    #[test]
+    fn test_detect_err() {
+        assert_eq!(CardListingFormat::try_from("4040440"), Err(()));
+    }
+}
+
 fn read_file(filename: &str) -> std::io::Result<String> {
     let mut file = File::open(filename)?;
     let mut buffer = String::new();
