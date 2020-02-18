@@ -4,7 +4,7 @@ use std::convert::TryFrom;
 use std::fs::File;
 use std::io::Read;
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
 enum CardListingFormat {
     Number,     // e.g. "4 Chandra's spitfire"
     NumberAndX, // e.g. "4x Chandra's Spitfire"
@@ -41,17 +41,11 @@ impl TryFrom<&str> for CardListingFormat {
                 *format_counter.entry(detected_format).or_insert(0) += 1;
             }
 
-            let most_common_format: Option<&CardListingFormat> = format_counter
+            format_counter
                 .iter()
                 .max_by_key(|(_format, count)| count.clone())
-                .map(|(format, _count)| format);
-
-            match most_common_format {
-                Some(&CardListingFormat::NumberAndX) => Ok(CardListingFormat::NumberAndX),
-                Some(&CardListingFormat::Number) => Ok(CardListingFormat::Number),
-                Some(&CardListingFormat::Plain) => Ok(CardListingFormat::Plain),
-                None => Err(()),
-            }
+                .map(|(format, _count)| *format)
+                .ok_or(())
         } else {
             // Just a single line
 
